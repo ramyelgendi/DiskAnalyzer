@@ -12,6 +12,54 @@ namespace fs= std::experimental::filesystem;
 
 
 
+
+double size;
+double traverse(treeNode* Node) {
+    try{
+    string t=Node->getPath();
+    for ( auto& entry : fs::directory_iterator(t)) {
+        string filenameStr = entry.path().filename().string();
+        cout<<filenameStr<<endl;
+        Node->addChild(entry.path().string());
+
+         if (entry.is_regular_file()) {
+             Node->getChild(Node->getChildrenNumber())->setsize(entry.file_size());
+             size+=(Node->getChild(Node->getChildrenNumber()))->getSize();
+             cout<<double(entry.file_size())/(1000*1000)<<endl;
+        }
+       else if (entry.is_directory()) {
+                   int k=Node->getChildrenNumber();
+                   size=traverse(Node->getChild(k));
+                   Node->setsize(size);
+                   cout<<size/(1000*1000)<<endl;
+               }
+
+    }
+    }
+    catch(fs::filesystem_error &e){
+        cout<<e.what()<<endl;
+    }
+    return size;
+    
+}
+   
+
+
+
+int main(int argc, const char * argv[]) {
+    treeNode *root= new treeNode("/Users");
+    root->setsize(traverse(root));
+    cout<<root->getSize()/(1000*1000)<<endl;
+    
+    
+    return 0;
+}
+
+
+
+
+
+
 //
 //void traverse(treeNode* Node){
 //    for(auto &p : fs::directory_iterator(Node->getPath())){
@@ -27,28 +75,28 @@ namespace fs= std::experimental::filesystem;
 //
 //
 //}
-void traverse(treeNode* Node, int level = 0) {
-    try{
-    string t=Node->getPath();
-    for ( auto& entry : fs::directory_iterator(t)) {
-        string filenameStr = entry.path().filename().string();
-        cout<<filenameStr<<endl;
-        Node->addChild(entry.path().string());
-        if (entry.is_directory()) {
-            int k=Node->getChildrenNumber();
-            traverse(Node->getChild(k), level+1);
-        }
-        else if (entry.is_regular_file()) {
-    Node->getChild(Node->getChildrenNumber())->setsize(entry.file_size());
-        }
-        else
-            std::cout << std::setw(level * 3) << "" << " [?]" << filenameStr << '\n';
-    }
-    }
-    catch(fs::filesystem_error &e){
-        cout<<e.what()<<endl;
-    }
-}
+//void traverse(treeNode* Node, int level = 0) {
+//    try{
+//    string t=Node->getPath();
+//    for ( auto& entry : fs::directory_iterator(t)) {
+//        string filenameStr = entry.path().filename().string();
+//        cout<<filenameStr<<endl;
+//        Node->addChild(entry.path().string());
+//        if (entry.is_directory()) {
+//            int k=Node->getChildrenNumber();
+//            traverse(Node->getChild(k), level+1);
+//        }
+//        else if (entry.is_regular_file()) {
+//    Node->getChild(Node->getChildrenNumber())->setsize(entry.file_size());
+//        }
+//        else
+//            std::cout << std::setw(level * 3) << "" << " [?]" << filenameStr << '\n';
+//    }
+//    }
+//    catch(fs::filesystem_error &e){
+//        cout<<e.what()<<endl;
+//    }
+//}
 
 //void traverse(string path, int level = 0) {
 //    for (const auto& entry : fs::directory_iterator(path)) {
@@ -64,12 +112,3 @@ void traverse(treeNode* Node, int level = 0) {
 //
 //    }
 //}
-
-int main(int argc, const char * argv[]) {
-    treeNode *root= new treeNode("/Users");
-    traverse(root);
-    
-    std::cout<<"botta is awesome"<<std::endl;
-    
-    return 0;
-}
